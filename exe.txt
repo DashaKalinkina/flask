@@ -1,0 +1,2 @@
+pip install pyinstaller
+pyinstaller --onefile --name=ConferencesRu --add-data "website/templates;templates" --add-data "website/static;static" main.py
