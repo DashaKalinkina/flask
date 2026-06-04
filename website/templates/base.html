@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes, viewport-fit=cover">
+    <title>Конференции.РФ</title>
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+
+</head>
+<body>
+    <header class="header">
+        <div class="container">
+            <div class="header-content">
+                <a href="/" class="logo">
+                    <img src="{{ url_for('static', filename='img/Mask group (3).png') }}" alt="Логотип">
+                    <span class="logo-text">Конференции.РФ</span>
+                </a>
+                {% if current_user.is_authenticated %}
+                <nav class="nav">
+                    {% if not current_user.is_admin() %}
+                    <a href="{{ url_for('views.dashboard') }}" class="nav-link">Личный кабинет</a>
+                    <a href="{{ url_for('views.new_booking') }}" class="nav-link">Новая заявка</a>
+                    {% else %}
+                    <a href="{{ url_for('admin.admin_panel') }}" class="nav-link">Админ-панель</a>
+                    {% endif %}
+                    <a href="{{ url_for('auth.logout') }}" class="nav-link logout">Выйти</a>
+                </nav>
+                {% endif %}
+            </div>
+        </div>
+    </header>
+
+    <main class="main-content">
+        <div class="container">
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    {% for category, message in messages %}
+                        <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+                            {{ message }}
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                        </div>
+                    {% endfor %}
+                {% endif %}
+            {% endwith %}
+            
+            {% block content %}{% endblock %}
+        </div>
+    </main>
+
+
+    <footer class="footer bg-dark text-white mt-auto py-4">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-4 mb-3 mb-md-0">
+                    <h5 class="text-success mb-3">Конференции.РФ</h5>
+                    <p class="small text-white-50">Бронирование помещений для всероссийских конференций</p>
+                </div>
+                <div class="col-md-4 mb-3 mb-md-0">
+                    <h5 class="text-success mb-3"> Наше местонахождение:</h5>
+                    <p class="mb-1 small">
+        
+                    Адрес головного офиса: г. Москва, ул. Большая Ордынка, д. 15
+                    </p>
+                    <p class="mb-0 small">
+                     
+                        info@conferences.ru
+                    </p>
+                </div>
+                <div class="col-md-4">
+                    <h5 class="text-success mb-3">Телефон горячей линии:</h5>
+                    <p class="mb-1 small">+7 (495) 123-45-67</p>
+                    <p class="mb-1 small">Если возникли вопросы или пожелания, позвоните нам. Ответим оперативно и подробно.</p>
+                 
+                </div>
+            </div>
+            <hr class="my-3 border-secondary">
+            <div class="text-center small text-white-50">
+                © 2026 Конференции.РФ. Все права защищены.
+            </div>
+        </div>
+    </footer>
+
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
+    {% block scripts %}{% endblock %}
+</body>
+</html>

@@ -1,0 +1,147 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="dashboard-header">
+    <h2>Личный кабинет</h2>
+    <p>Добро пожаловать, {{ current_user.fullname }}!</p>
+</div>
+
+
+<h3 > Мои заявки</h3>
+
+{% if bookings %}
+    <div class="bookings-list">
+        {% for booking in bookings %}
+        <div class="booking-card">
+            <div class="booking-header">
+                <span class="booking-room">
+                    {% if booking.room == 'auditorium' %} Аудитория
+                    {% elif booking.room == 'coworking' %} Коворкинг
+                    {% else %} Кинозал{% endif %}
+                </span>
+                <span class="booking-status 
+                    {% if booking.status == 'новая' %}status-new
+                    {% elif booking.status == 'мероприятие назначено' %}status-assigned
+                    {% elif booking.status == 'мероприятие завершено' %}status-completed
+                    {% endif %}">
+                    {{ booking.status }}
+                </span>
+            </div>
+            
+            <div class="booking-body">
+                <p><strong> Дата:</strong> {{ booking.date }}</p>
+                <p><strong> Способ оплаты:</strong> 
+                    {% if booking.payment_method == 'qr' %}Предоплата по QR-коду
+                    {% elif booking.payment_method == 'mir' %}Оплата картой МИР
+                    {% else %}Постоплата в офисе{% endif %}
+                </p>
+                <p><strong> Создана:</strong> {{ booking.created_at.strftime('%d.%m.%Y %H:%M') }}</p>
+            </div>
+            
+            <!-- для отзыва -->
+            {% if booking.can_review %}
+            <div class="review-simple">
+                <button class="btn-show-review" onclick="toggleReviewForm({{ booking.id }})">
+                     Оставить отзыв
+                </button>
+                
+                <div id="review-form-{{ booking.id }}" class="review-form-simple hidden">
+                    <form method="POST" action="{{ url_for('views.add_review', booking_id=booking.id) }}" class="simple-review-form">
+                        <textarea name="text" class="form-control" rows="3" placeholder="Поделитесь впечатлениями..." required></textarea>
+                        <div class="review-actions">
+                            <button type="submit" class="btn btn-primary btn-small">Отправить</button>
+                            <button type="button" class="btn btn-secondary btn-small" onclick="toggleReviewForm({{ booking.id }})">Отмена</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            {% elif booking.review %}
+            <div class="review-done-simple">
+                <span> Отзыв оставлен</span>
+                <div class="review-text-preview">
+                    "{{ booking.review.text[:80] }}{% if booking.review.text|length > 80 %}...{% endif %}"
+                </div>
+            </div>
+            {% endif %}
+        </div>
+        {% endfor %}
+    </div>
+{% else %}
+    <div class="empty-state">
+        <p> У вас пока нет заявок</p>
+        <a href="{{ url_for('views.new_booking') }}" class="btn btn-primary"> Создать заявку</a>
+    </div>
+{% endif %}
+
+<div class="page">
+    <p> Забронируйте помещение для проведения Всероссийских конференций</p>
+</div>
+
+<!-- слайдер -->
+<div class="slider-container">
+    <div class="slider">
+        <div class="slide active">
+            <div class="slide-placeholder">
+                <img src="{{ url_for('static', filename='img/12fe2c7de382debb49c.jpg') }}" alt="Слайд 1">
+            </div>
+        </div>
+        <div class="slide">
+            <div class="slide-placeholder">
+                <img src="{{ url_for('static', filename='img/5622ba05cc6857865cfa.jpg') }}" alt="Слайд 2">
+            </div>
+        </div>
+        <div class="slide">
+            <div class="slide-placeholder">
+                <img src="{{ url_for('static', filename='img/7621e0c3c1df2e3322f6222ff94e67f3.jpg') }}" alt="Слайд 3">
+            </div>
+        </div>
+        <div class="slide">
+            <div class="slide-placeholder">
+                <img src="{{ url_for('static', filename='img/978e0d84d6b940fe1.jpg') }}" alt="Слайд 4">
+            </div>
+        </div>
+    </div>
+    <button class="slider-btn prev"><</button>
+    <button class="slider-btn next">></button>
+    <div class="slider-dots"></div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    //функция для переключения видимости отзыва
+    function toggleReviewForm(bookingId) {
+        const form = document.getElementById(`review-form-${bookingId}`);
+        if (form) {
+            form.classList.toggle('hidden');
+        }
+    }
+    //обработка отправки без перезагрузки страницы
+    document.querySelectorAll('.simple-review-form').forEach(form => {
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const formData = new FormData(form);
+            const action = form.action;
+            
+            try {
+                const response = await fetch(action, {
+                    method: 'POST',
+                    body: formData,
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest'
+                    }
+                });
+                
+                if (response.ok) {
+                    window.location.reload();
+                } else {
+                    const data = await response.json();
+                    alert(data.error || 'Ошибка при отправке отзыва');
+                }
+            } catch (error) {
+                alert('Ошибка сети');
+            }
+        });
+    });
+</script>
+{% endblock %}

@@ -1,0 +1,56 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="form-container">
+    <h2>Регистрация</h2>
+    <form method="POST" action="{{ url_for('auth.register') }}">
+        {{ form.hidden_tag() }}
+        
+        <div class="form-group">
+            <label for="login">Логин (латиница, цифры, минимум 6 символов)</label>
+            {{ form.login(class="form-control", placeholder="Введите логин") }}
+            {% if form.login.errors %}
+                <div class="error-message">{{ form.login.errors[0] }}</div>
+            {% endif %}
+        </div>
+        
+        <div class="form-group">
+            <label for="password">Пароль (минимум 8 символов)</label>
+            {{ form.password(class="form-control", type="password", placeholder="Введите пароль") }}
+            {% if form.password.errors %}
+                <div class="error-message">{{ form.password.errors[0] }}</div>
+            {% endif %}
+        </div>
+        
+        <div class="form-group">
+            <label for="fullname">ФИО</label>
+            {{ form.fullname(class="form-control", placeholder="Иванов Иван Иванович") }}
+            {% if form.fullname.errors %}
+                <div class="error-message">{{ form.fullname.errors[0] }}</div>
+            {% endif %}
+        </div>
+        
+        <div class="form-group">
+            <label for="phone">Контактный телефон</label>
+            {{ form.phone(class="form-control", placeholder="+7 (999) 123-45-67") }}
+            {% if form.phone.errors %}
+                <div class="error-message">{{ form.phone.errors[0] }}</div>
+            {% endif %}
+        </div>
+        
+        <div class="form-group">
+            <label for="email">Email</label>
+            {{ form.email(class="form-control", placeholder="ivan@example.com") }}
+            {% if form.email.errors %}
+                <div class="error-message">{{ form.email.errors[0] }}</div>
+            {% endif %}
+        </div>
+        
+        <button type="submit" class="btn btn-primary btn-block">Зарегистрироваться</button>
+    </form>
+    
+    <div class="form-footer">
+        <a href="{{ url_for('auth.login') }}">Уже есть аккаунт? Войти</a>
+    </div>
+</div>
+{% endblock %}

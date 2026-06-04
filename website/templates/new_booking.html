@@ -1,0 +1,93 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="form-container">
+    <h2>Новая заявка на бронирование</h2>
+    
+    <form method="POST" action="{{ url_for('views.new_booking') }}" id="bookingForm">
+        {{ form.hidden_tag() }}
+        
+        <div class="form-group">
+            <label for="room">Выберите помещение</label>
+            {{ form.room(class="form-control") }}
+            {% if form.room.errors %}
+                <div class="error-message">{{ form.room.errors[0] }}</div>
+            {% endif %}
+        </div>
+        
+        <div class="form-group">
+            <label for="date">Дата начала конференции</label>
+            <input type="date" name="date" id="datepicker" class="form-control" required>
+            <small class="form-text text-muted">Выберите дату не ранее сегодняшнего дня</small>
+            <div id="date-error" class="error-message" style="display: none;"></div>
+            {% if form.date.errors %}
+                <div class="error-message">{{ form.date.errors[0] }}</div>
+            {% endif %}
+        </div>
+        
+        <div class="form-group">
+            <label for="payment_method">Способ оплаты</label>
+            {{ form.payment_method(class="form-control") }}
+            {% if form.payment_method.errors %}
+                <div class="error-message">{{ form.payment_method.errors[0] }}</div>
+            {% endif %}
+        </div>
+        
+        <button type="submit" class="btn btn-primary btn-block" id="submitBtn">Отправить заявку</button>
+    </form>
+</div>
+
+<script>
+  
+    const dateInput = document.getElementById('datepicker');
+    const submitBtn = document.getElementById('submitBtn');
+    const dateError = document.getElementById('date-error');
+    
+    // установка сегодняшнец даты
+    const today = new Date();
+    const year = today.getFullYear();
+    const month = String(today.getMonth() + 1).padStart(2, '0');
+    const day = String(today.getDate()).padStart(2, '0');
+    const minDate = `${year}-${month}-${day}`;
+    
+    
+    dateInput.setAttribute('min', minDate);
+    
+    // функция проверки даты
+    function validateDate() {
+        const selectedDate = dateInput.value;
+        
+        if (!selectedDate) {
+            dateError.style.display = 'block';
+            dateError.textContent = 'Пожалуйста, выберите дату';
+            submitBtn.disabled = true;
+            return false;
+        }
+        
+        if (selectedDate < minDate) {
+            dateError.style.display = 'block';
+            dateError.textContent = 'Дата не может быть раньше сегодняшнего дня';
+            submitBtn.disabled = true;
+            return false;
+        }
+        
+        dateError.style.display = 'none';
+        submitBtn.disabled = false;
+        return true;
+    }
+    
+    // проверяем при изменении даты
+    dateInput.addEventListener('change', validateDate);
+    dateInput.addEventListener('input', validateDate);
+    
+    // проверяем при отправке формы
+    document.getElementById('bookingForm').addEventListener('submit', function(e) {
+        if (!validateDate()) {
+            e.preventDefault();
+        }
+    });
+    
+    // вызываем проверку при загрузке страницы
+    validateDate();
+</script>
+{% endblock %}
